@@ -1,0 +1,20 @@
+---
+- name: install required packages
+  apt:
+    name:
+      - unzip
+      - wget
+      - xz-utils
+    state: present
+
+- name: fetch latest vagrant debian download link
+  shell: >
+    wget -qO- {{ vagrant_page }}
+    | tr \" \\n | grep https\*:// | grep 64.deb
+  register: vagrant
+  changed_when: false
+
+- name: install vagrant
+  apt:
+    deb: "{{ vagrant.stdout }}"
+  become: true

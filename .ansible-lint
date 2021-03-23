@@ -1,0 +1,7 @@
+skip_list:
+  - 'yaml'
+  - 'risky-shell-pipe'
+  - 'role-name'
+  - 'git-latest'
+  - 'no-changed-when'
+  - 'command-instead-of-module'
