@@ -6,15 +6,16 @@
       - wget
       - xz-utils
     state: present
+  become: true
+
+- name: gather package facts
+  package_facts:
+    manager: "auto"
 
 - name: fetch latest vagrant debian download link
   shell: >
     wget -qO- {{ vagrant_page }}
     | tr \" \\n | grep https\*:// | grep 64.deb
-  register: vagrant
-  changed_when: false
-
-- name: install vagrant
-  apt:
-    deb: "{{ vagrant.stdout }}"
-  become: true
+  register: vagrant_debian
+  when: "'vagrant' not in ansible_facts.packages"
+  notify: install vagrant

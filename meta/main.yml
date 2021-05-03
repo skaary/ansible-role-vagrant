@@ -3,4 +3,4 @@ dependencies: []
 
 galaxy_info:
   role_name: vagrant
-  description: Vagrant for linux.
+  description: Role to install Vagrant for Linux.
