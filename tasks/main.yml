@@ -1,21 +1,35 @@
 ---
-- name: install required packages
+- name: find all versions of Vagrant
+  uri:
+    url: https://releases.hashicorp.com/vagrant/index.json
+    return_content: true
+  register: vagrant_index
+  when: vagrant_version == 'latest'
+
+- name: finds the latest version of Vagrant when latest var is define
+  set_fact:
+    vagrant_version_to_install: "{{ item }}"
+  with_items: "{{ (vagrant_index.content | from_json).versions | list | sort | last }}"
+  when: vagrant_version == 'latest'
+
+- name: use the specified Vagrant version when latest var is not defined
+  set_fact:
+    vagrant_version_to_install: "{{ vagrant_version }}"
+  when: vagrant_version != 'latest'
+
+# This task avoids downloading Vagrant every time
+- name: check if Vagrant is present with the right version
+  command: vagrant --version
+  register: vagrant_installed_version
+  ignore_errors: true
+  changed_when: false
+  failed_when: false
+
+- name: install Vagrant
   apt:
-    name:
-      - unzip
-      - wget
-      - xz-utils
+    deb: "https://releases.hashicorp.com/vagrant/{{ vagrant_version_to_install }}/vagrant_{{ vagrant_version_to_install }}_x86_64.deb"
     state: present
+  when:
+    # - ansible_pkg_mgr == "apt"
+    - vagrant_version_to_install not in vagrant_installed_version.stdout | default('')
   become: true
-
-- name: gather package facts
-  package_facts:
-    manager: "auto"
-
-- name: fetch latest vagrant debian download link
-  shell: >
-    wget -qO- {{ vagrant_page }}
-    | tr \" \\n | grep https\*:// | grep 64.deb
-  register: vagrant_debian
-  when: "'vagrant' not in ansible_facts.packages"
-  notify: install vagrant

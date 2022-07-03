@@ -1,5 +1,0 @@
----
-- name: install vagrant
-  apt:
-    deb: "{{ vagrant_debian.stdout }}"
-  become: true
