@@ -1,0 +1,5 @@
+---
+- name: Install Vagrant
+  hosts: all
+  roles:
+    - vagrant
